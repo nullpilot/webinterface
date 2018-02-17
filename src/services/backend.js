@@ -14,14 +14,15 @@ const uploadFile = (file, handle) => {
   const byteChunks = FileProcessor.createByteChunks(file.size);
   const genesisHash = Encryption.sha256(handle);
   return Promise.all([
-    createUploadSession(API.BROKER_NODE_A, file.size, genesisHash)
-    // createUploadSession(API.BROKER_NODE_B, file.size, genesisHash)
+    createUploadSession(API.BROKER_NODE_A, file.size, genesisHash),
+    //createUploadSession(API.BROKER_NODE_B, file.size, genesisHash)
   ])
-    .then(([alphaSessionId, betaSessionId]) =>
-      Promise.all([
-        sendToAlphaBroker(alphaSessionId, byteChunks, file, handle, genesisHash)
-        // sendToBetaBroker(betaSessionId, byteChunks, file, handle, genesisHash)
-      ])
+    .then(([sessionIds]) => {
+            Promise.all([
+                sendToAlphaBroker(sessionIds.alpha, byteChunks, file, handle, genesisHash),
+                sendToBetaBroker(sessionIds.beta, byteChunks, file, handle, genesisHash)
+            ])
+        }
     )
     .then(() => {
       return { numberOfChunks: byteChunks.length, handle, fileName: file.name };
@@ -39,7 +40,8 @@ const createUploadSession = (host, fileSizeBytes, genesisHash) =>
       .then(({ data }) => {
         console.log("UPLOAD SESSION SUCCESS: ", data);
         const { id: sessionId } = data;
-        resolve(sessionId);
+        const { beta_session_id: betaSessionId } = data;
+        resolve({alpha: sessionId, beta: betaSessionId});
       })
       .catch(error => {
         console.log("UPLOAD SESSION ERROR: ", error);
