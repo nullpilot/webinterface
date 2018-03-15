@@ -1,9 +1,9 @@
 import _ from "lodash";
-import Encryption from "utils/encryption";
+import Encryption from "./encryption";
 import Base64 from "base64-arraybuffer";
 
-import Iota from "services/iota";
-import { FILE, IOTA_API } from "config";
+import Iota from "../services/iota";
+import { FILE, IOTA_API } from "../config";
 
 const metaDataToIotaFormat = (object, handle) => {
   const metaDataString = JSON.stringify(object);
