@@ -21,8 +21,8 @@ const metaDataFromIotaFormat = (trytes, handle) => {
   return metaData;
 };
 
-const encryptFile = (file, handle) =>
-  readBlob(file).then(arrayBuffer => {
+const encryptFile = (handle, buf) => {
+  return readBuffer(buf).then(arrayBuffer => {
     const encodedData = Base64.encode(arrayBuffer);
     const encryptedData = Encryption.encrypt(encodedData, handle);
     const trytes = Iota.utils.toTrytes(encryptedData);
@@ -30,6 +30,7 @@ const encryptFile = (file, handle) =>
     // console.log("[UPLOAD] ENCRYPTED FILE: ", trytes);
     return trytes;
   });
+}
 
 const decryptFile = (trytes, handle) => {
   // console.log("[DOWNLOAD] DECRYPTED FILE: ", trytes);
@@ -48,11 +49,12 @@ const chunkGenerator = ({ idx, startingPoint, type }) => {
   return { idx, startingPoint, type };
 };
 
-const initializeUpload = file => {
-  const handle = createHandle(file.name);
-  return encryptFile(file, handle).then(data => {
+const initializeUpload = (filename, buf) => {
+  const handle = createHandle(filename);
+
+  return encryptFile(handle, buf).then(data => {
     const numberOfChunks = createByteLocations(data.length).length;
-    return { handle, fileName: file.name, numberOfChunks, data };
+    return { handle, fileName: filename, numberOfChunks, data };
   });
 };
 
@@ -89,17 +91,17 @@ const createByteChunks = fileSizeBytes => {
   return [metaDataChunk, ...fileContentChunks];
 };
 
-const readBlob = blob =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = function(evt) {
-      if (evt.target.readyState === FileReader.DONE) {
-        const arrayBuffer = evt.target.result;
-        resolve(arrayBuffer);
-      }
-    };
-    reader.readAsArrayBuffer(blob);
+const readBuffer = (buf) => {
+  const promise = new Promise((resolve, reject) => {
+    if(buf.buffer) {
+      resolve(buf.buffer)
+    } else {
+      reject('Not a buffer')
+    }
   });
+
+  return promise
+}
 
 const metaDataToChunkParams = (metaData, idx, handle, genesisHash) =>
   chunkParamsGenerator({
@@ -156,6 +158,5 @@ export default {
   encryptFile,
   initializeUpload,
   metaDataFromIotaFormat,
-  metaDataToIotaFormat,
-  readBlob
+  metaDataToIotaFormat
 };
