@@ -1,6 +1,6 @@
 import _ from "lodash";
-import iota from "services/iota";
-import Encryption from "utils/encryption";
+import iota from "../services/iota";
+import Encryption from "./encryption";
 
 const generate = (handle, size) => {
   const keys = _.range(1, size + 1);

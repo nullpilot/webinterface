@@ -1,9 +1,9 @@
 import _ from "lodash";
 import axios from "axios";
 
-import FileProcessor from "utils/file-processor";
-import Encryption from "utils/encryption";
-import { API, IOTA_API } from "config";
+import FileProcessor from "../utils/file-processor";
+import Encryption from "../utils/encryption";
+import { API, IOTA_API } from "../config";
 
 const axiosInstance = axios.create({
   timeout: 200000
