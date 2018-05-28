@@ -129,7 +129,7 @@ const decryptChunk = (key, secret) => {
     return "";
   }
 
-  return decipher.output
+  return decipher.output.bytes()
 };
 
 export default {
