@@ -26,6 +26,7 @@ const metaDataFromIotaFormat = (trytes, handle) => {
   const encryptedData = Iota.utils.fromTrytes(
     Iota.addPaddingIfOdd(stopperRemoved)
   );
+
   const { version, meta: encryptedMeta } = parseMetaVersion(encryptedData);
   const decryptedData = Encryption.decryptChunk(handleInBytes, encryptedMeta);
 
@@ -68,16 +69,13 @@ const addVersionToMeta = metaStr => {
   const typedVersion = new DataView(new ArrayBuffer(VERSION_BYTES));
   typedVersion.setUint32(0, CURRENT_VERSION);
   const buf = new forge.util.ByteBuffer(typedVersion.buffer);
-  const trytes = Iota.utils.toTrytes(buf.bytes());
-  return `${trytes}${metaStr}`;
+  return `${buf.bytes()}${metaStr}`;
 };
 
 const parseMetaVersion = metaRaw => {
-  const idx = 2 * VERSION_BYTES; // 2 chars per byte in hex
-  const trytes = metaRaw.substring(0, idx);
-  const meta = metaRaw.substring(idx);
-  const buf = new forge.util.ByteBuffer(Iota.utils.fromTrytes(trytes));
-  const bytes = forge.util.binary.raw.decode(buf.bytes());
+  const rawVersion = metaRaw.substring(0, VERSION_BYTES);
+  const meta = metaRaw.substring(VERSION_BYTES);
+  const bytes = forge.util.binary.raw.decode(rawVersion);
   const version = (new DataView(bytes.buffer)).getUint32(0);
 
   return { version, meta };
