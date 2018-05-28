@@ -91,7 +91,8 @@ const encryptChunk = (key, idx, secret) => {
 
   cipher.start({
     iv: iv,
-    tagLength: TAG_LENGTH * 8
+    tagLength: TAG_LENGTH * 8,
+    additionalData: 'binary-encoded string'
   });
 
   cipher.update(forge.util.createBuffer(secret));
@@ -102,6 +103,7 @@ const encryptChunk = (key, idx, secret) => {
 
 const decryptChunk = (key, secret) => {
   key.read = 0;
+
   const iv = secret.substr(-IV_LENGTH);
   const tag = secret.substr(-TAG_LENGTH - IV_LENGTH, TAG_LENGTH);
   const decipher = forge.cipher.createDecipher("AES-GCM", key);
@@ -109,7 +111,8 @@ const decryptChunk = (key, secret) => {
   decipher.start({
     iv: iv,
     tag: tag,
-    tagLength: TAG_LENGTH * 8
+    tagLength: TAG_LENGTH * 8,
+    additionalData: 'binary-encoded string'
   });
 
   decipher.update(
