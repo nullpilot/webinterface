@@ -21,14 +21,11 @@ const initializeUpload = file => {
 
 const metaDataFromIotaFormat = (trytes, handle) => {
   const handleInBytes = Encryption.bytesFromHandle(handle);
-
   const stopperRemoved = Iota.removeStopperTryteAndPadding(trytes);
   const encryptedData = Iota.utils.fromTrytes(
     Iota.addPaddingIfOdd(stopperRemoved)
   );
-
   const { version, meta: encryptedMeta } = parseMetaVersion(encryptedData);
-
   const decryptedData = Encryption.decryptChunk(handleInBytes, encryptedMeta);
 
   return JSON.parse(decryptedData);
@@ -96,8 +93,8 @@ const fileToChunks = (file, handle, opts = {}) =>
       Promise.all(chunks.map(readBlob)).then(arrayBuffer => {
         let encryptedChunks = arrayBuffer
           .map(arrayBufferToString)
-          .map(binaryString =>
-            Encryption.encryptChunk(handleInBytes, binaryString)
+          .map((binaryString, idx) =>
+            Encryption.encryptChunk(handleInBytes, idx + 1, binaryString)
           )
           .map(Iota.utils.toTrytes)
           .map(Iota.addStopperTryte)
@@ -107,6 +104,7 @@ const fileToChunks = (file, handle, opts = {}) =>
           const metaChunk = createMetaData(file.name, chunksCount);
           const encryptedMeta = Encryption.encryptChunk(
             handleInBytes,
+            0,
             metaChunk
           );
 
