@@ -104,6 +104,11 @@ const encryptChunk = (key, idx, secret) => {
 const decryptChunk = (key, secret) => {
   key.read = 0;
 
+  // Require a payload of at least one byte to attempt decryption
+  if (secret.length <= (IV_LENGTH + TAG_LENGTH)) {
+    return "";
+  }
+
   const iv = secret.substr(-IV_LENGTH);
   const tag = secret.substr(-TAG_LENGTH - IV_LENGTH, TAG_LENGTH);
   const decipher = forge.cipher.createDecipher("AES-GCM", key);
